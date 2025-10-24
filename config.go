@@ -3,9 +3,19 @@ package gofig
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+)
+
+var (
+	// ErrUnsupportedFileType is returned when the config file
+	// extension is not supported by the loader
+	ErrUnsupportedFileType = errors.New("gofig: unsupported file type")
+
+	// ErrParseError is returned when the config file is syntactically invalid
+	ErrParseError = errors.New("gofig: parse error")
 )
 
 // Load reads a configuration file from the given path and populates
@@ -31,8 +41,7 @@ func Load(filePath string, cfg interface{}) error {
 		// Delegate to our new JSON parser function
 		return parseJSON(file, cfg)
 	default:
-		// Returns an clear error message when the file type is unsupported
-		return fmt.Errorf("unsupported config file type: %s", ext)
+		return fmt.Errorf("%w: %s", ErrUnsupportedFileType, ext)
 	}
 }
 
@@ -40,7 +49,7 @@ func Load(filePath string, cfg interface{}) error {
 func parseJSON(file *os.File, cfg interface{}) error {
 	decoder := json.NewDecoder(file)
 	if err := decoder.Decode(cfg); err != nil {
-		return err
+		return fmt.Errorf("%w: %v", ErrParseError, err)
 	}
 	return nil
 }

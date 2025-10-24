@@ -1,7 +1,7 @@
 package gofig_test
 
 import (
-	"strings"
+	"errors"
 	"testing"
 
 	gofig "github.com/VJ-2303/Gofig"
@@ -40,8 +40,21 @@ func TestLoad_UnSupportedFile(t *testing.T) {
 	if err == nil {
 		t.Fatal("Expected unsupported filetype Error, but got nil")
 	}
-	expectedErrMsg := "unsupported config file type: .txt"
-	if !strings.Contains(err.Error(), expectedErrMsg) {
-		t.Errorf("expected error to contain: %q, but got %q", expectedErrMsg, err.Error())
+	if !errors.Is(err, gofig.ErrUnsupportedFileType) {
+		t.Errorf("expected error %v, but got %v", gofig.ErrUnsupportedFileType, err)
+	}
+}
+
+func TestLoad_BadJSON(t *testing.T) {
+	var cfg struct{}
+
+	filepath := "testdata/bad.json"
+	err := gofig.Load(filepath, &cfg)
+
+	if err == nil {
+		t.Fatal("expected an error for bad JSON, but go nil")
+	}
+	if !errors.Is(err, gofig.ErrParseError) {
+		t.Errorf("expected error %v, but got %v", gofig.ErrParseError, err)
 	}
 }
