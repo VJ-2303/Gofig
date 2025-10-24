@@ -1,6 +1,7 @@
 package gofig_test
 
 import (
+	"strings"
 	"testing"
 
 	gofig "github.com/VJ-2303/Gofig"
@@ -25,5 +26,22 @@ func TestLoad_JSON(t *testing.T) {
 	}
 	if cfg.Host != "localhost" {
 		t.Errorf("expected Host to be 'localhost', but go %s", cfg.Host)
+	}
+}
+
+// TestLoad_UnSupportedFile tests that Load returns an error
+// for an unsupported file extension
+func TestLoad_UnSupportedFile(t *testing.T) {
+	var cfg struct{}
+
+	filepath := "testdata/config.txt"
+	err := gofig.Load(filepath, &cfg)
+
+	if err == nil {
+		t.Fatal("Expected unsupported filetype Error, but got nil")
+	}
+	expectedErrMsg := "unsupported config file type: .txt"
+	if !strings.Contains(err.Error(), expectedErrMsg) {
+		t.Errorf("expected error to contain: %q, but got %q", expectedErrMsg, err.Error())
 	}
 }
