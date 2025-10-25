@@ -10,4 +10,8 @@ var (
 	// ErrNotFound is returned when the configuration file
 	// at the specified path is does not exists.
 	ErrNotFound = errors.New("gofig: configuration file not found")
+
+	// ErrUnsupportedFormat is returned when the file extension
+	// is not supported config format
+	ErrUnsupportedFormat = errors.New("gofig: unsupported file format")
 )

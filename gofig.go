@@ -3,8 +3,10 @@
 package gofig
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 )
 
@@ -22,16 +24,26 @@ func Load(path string, cfg any) error {
 		return ErrNotAPointer
 	}
 
-	// Check if the file exists, os.Stat gets file info and an error
-	if _, err := os.Stat(path); err != nil {
-		// Check if the error is specifically a "not exists" error
-		if os.IsNotExist(err) {
-			// If yes return our custom ErrNotFound error
+	// Read the file's raw bytes.
+	_, err := os.ReadFile(path)
+	if err != nil {
+		// Check if the error is 'file not found' and return custom error
+		if errors.Is(err, os.ErrNotExist) {
 			return ErrNotFound
 		}
-		// Might be some other error, (e.g permission)
 		return err
 	}
-	fmt.Printf("DEBUG: Attempting to load config from: %s\n", path)
+
+	// Get the file extension using filepath.Ext function
+	ext := filepath.Ext(path)
+
+	// Decide which parser to use based on the extension
+	switch ext {
+	case ".json":
+		fmt.Printf("DEBUG: Detected JSON file\n")
+	default:
+		// If the extension is not recognized return the custom error
+		return ErrUnsupportedFormat
+	}
 	return nil
 }
