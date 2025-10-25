@@ -9,8 +9,22 @@ func TestLoad(t *testing.T) {
 	}
 	var cfg AppConfig
 
-	err := Load("fake-path.json", &cfg)
-	if err != nil {
-		t.Errorf("Load() returned an unexpected error: %v", err)
-	}
+	t.Run("success: valid pointer and file exists", func(t *testing.T) {
+		err := Load("testdata/dummy.txt", &cfg)
+		if err != nil {
+			t.Errorf("Expected no error, but got: %v", err)
+		}
+	})
+	t.Run("fail: 'cfg' is not a pointer", func(t *testing.T) {
+		err := Load("testdata/dummy.txt", cfg)
+		if err != ErrNotAPointer {
+			t.Errorf("Expected error %v, but got: %v", ErrNotAPointer, err)
+		}
+	})
+	t.Run("fail:file does not exists", func(t *testing.T) {
+		err := Load("non-exists-file.json", &cfg)
+		if err != ErrNotFound {
+			t.Errorf("Expected error %v, but got: %v", ErrNotFound, err)
+		}
+	})
 }
